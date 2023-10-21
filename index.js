@@ -1,13 +1,28 @@
 const express = require("express");
-const app = express();
-const http = require("http");
-const server = http.createServer(app);
+const fs = require("fs");
+const https = require("https");
+
+const privateKey = fs.readFileSync(
+  "/etc/letsencrypt/live/dividendgrowthinvesting.co.kr/privkey.pem"
+);
+const certificate = fs.readFileSync(
+  "/etc/letsencrypt/live/dividendgrowthinvesting.co.kr/fullchain.pem"
+);
+const option = {
+  key: privateKey.toString(),
+  cert: certificate.toString(),
+  ca: [certificate.toString()],
+  requestCert: false,
+};
+
+const server = https.createServer(option);
 const { Server } = require("socket.io");
 require("dotenv").config();
 
 const io = new Server(server, {
   cors: {
-    origin: "*",
+    origin: process.env.BASE_URL,
+    methods: ["GET", "POST"],
   },
 });
 
